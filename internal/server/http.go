@@ -8,25 +8,8 @@ import (
 )
 
 
-func NewHTTPServer(addr string) *http.Server {
-	httpsrv := NewHTTPServer()
-	r := mux.NewRouter()
-	r.HandleFunc("/", httpsrv.handleProduce).Methods("POST")
-	r.HandleFunc("/", httpsrv.handleConsume).Methods("GET")
-	return &http.Server{
-		Addr: addr,
-		Handler: r,
-	}
-}
-
 type httpServer struct {
 	Log *Log
-}
-
-func NewHTTPServer() *httpServer {
-	return &httpServer{
-		Log: NewLog(),
-	}
 }
 
 type ProduceRequest struct {
@@ -43,4 +26,42 @@ type ComsumeRequest struct {
 
 type ConsumeResponse struct {
 	Record Record `json:"record"`
+}
+
+func NewHTTPServer(addr string) *http.Server {
+	httpsrv := NewHTTPServer()
+	r := mux.NewRouter()
+	r.HandleFunc("/", httpsrv.handleProduce).Methods("POST")
+	r.HandleFunc("/", httpsrv.handleConsume).Methods("GET")
+	return &http.Server{
+		Addr: addr,
+		Handler: r,
+	}
+}
+
+
+func NewHTTPServer() *httpServer {
+	return &httpServer{
+		Log: NewLog(),
+	}
+}
+
+func (s *httpServer) handleProduce(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var req ProduceRequest
+	err := json.NewDecoder(r.Body).Decode(&req)    // 意味わからんコードだ Decodeってなんだ？
+	off, err := s.Log.Append(req.Record)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 
+	}
+	res := ProduceResponse{Offset: off}
+	err = json.NewEncoder(w).Encode(res)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 
+	}
+
+
 }
