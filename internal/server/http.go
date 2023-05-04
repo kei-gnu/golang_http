@@ -29,7 +29,7 @@ type ConsumeResponse struct {
 }
 
 func NewHTTPServer(addr string) *http.Server {
-	httpsrv := NewHTTPServer()
+	httpsrv := newHTTPServer()
 	r := mux.NewRouter()
 	r.HandleFunc("/", httpsrv.handleProduce).Methods("POST")
 	r.HandleFunc("/", httpsrv.handleConsume).Methods("GET")
@@ -78,6 +78,10 @@ func (s *httpServer) handleConsume(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 	record, err := s.Log.Read(req.Offset)
+	if err == ErrOffsetNotFound {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return 
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 
