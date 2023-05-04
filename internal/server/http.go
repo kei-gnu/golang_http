@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -42,6 +43,7 @@ func NewHTTPServer(addr string) *http.Server {
 
 
 func newHTTPServer() *httpServer {
+	fmt.Printf("newHTTPServer:\n")
 	return &httpServer{
 		Log: logger.NewLog(),
 	}
