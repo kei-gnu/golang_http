@@ -40,7 +40,7 @@ func NewHTTPServer(addr string) *http.Server {
 }
 
 
-func NewHTTPServer() *httpServer {
+func newHTTPServer() *httpServer {
 	return &httpServer{
 		Log: NewLog(),
 	}
