@@ -5,15 +5,16 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/kei-gnu/golang_http/logger"
 )
 
 
 type httpServer struct {
-	Log *Log
+	Log *logger.Log
 }
 
 type ProduceRequest struct {
-	Record Record `json:"record"`
+	Record logger.Record `json:"record"`
 }
 
 type ProduceResponse struct {
@@ -25,7 +26,7 @@ type ConsumeRequest struct {
 }
 
 type ConsumeResponse struct {
-	Record Record `json:"record"`
+	Record logger.Record `json:"record"`
 }
 
 func NewHTTPServer(addr string) *http.Server {
@@ -42,7 +43,7 @@ func NewHTTPServer(addr string) *http.Server {
 
 func newHTTPServer() *httpServer {
 	return &httpServer{
-		Log: NewLog(),
+		Log: logger.NewLog(),
 	}
 }
 
@@ -78,7 +79,7 @@ func (s *httpServer) handleConsume(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 	record, err := s.Log.Read(req.Offset)
-	if err == ErrOffsetNotFound {
+	if err == logger.ErrOffsetNotFound {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return 
 	}
