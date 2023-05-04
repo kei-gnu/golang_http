@@ -13,8 +13,8 @@ type Log struct {
 }
 
 type Record struct {
-	Value []byte `json:"value`		
-	Offset uint64 `json:offset`		// ログが格納される位置を示す整数値
+	Value []byte `json:"value"`		
+	Offset uint64 `json:"offset"`		// ログが格納される位置を示す整数値
 }
 
 // 新しいLogオブジェクトを生成し，ポインタを返す
