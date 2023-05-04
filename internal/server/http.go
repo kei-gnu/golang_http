@@ -20,7 +20,7 @@ type ProduceResponse struct {
 	Offset uint64 `json:"offset"`
 }
 
-type ComsumeRequest struct {
+type ConsumeRequest struct {
 	Offset uint64 `json:"offset"`
 }
 
@@ -51,6 +51,10 @@ func (s *httpServer) handleProduce(w http.ResponseWriter, r *http.Request) {
 
 	var req ProduceRequest
 	err := json.NewDecoder(r.Body).Decode(&req)    // 意味わからんコードだ Decodeってなんだ？
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return 
+	}
 	off, err := s.Log.Append(req.Record)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -62,6 +66,26 @@ func (s *httpServer) handleProduce(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 
 	}
+}
 
+func (s *httpServer) handleConsume(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 
+	var req ConsumeRequest
+	err := json.NewDecoder(r.Body).Decode(&req)    // 意味わからんコードだ Decodeってなんだ？
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return 
+	}
+	off, err := s.Log.Append(req.Record)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 
+	}
+	res := ProduceResponse{Offset: off}
+	err = json.NewEncoder(w).Encode(res)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 
+	}
 }
