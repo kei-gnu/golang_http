@@ -22,3 +22,24 @@ func TestLogAppend(t *testing.T) {
 		t.Errorf("Append did not store corret record: got %v, want %v", log.records[0], record)
 	}
 }
+
+func TestLogRead(t *testing.T) {
+	log := NewLog()
+	record := Record{Value: []byte("testreadlog")}
+	log.records = append(log.records, record)
+
+	got, err := log.Read(0)
+
+	if err != nil {
+		t.Errorf("Read returned unexpected error: %v", err)
+	}
+
+	if !reflect.DeepEqual(got, record) {
+		t.Errorf("Read returned unexpected record: got %v, want %v", got, record)
+	}
+
+	_, err = log.Read(1)
+	if err == nil {
+		t.Errorf("Read did not return expected error")
+	}
+}
