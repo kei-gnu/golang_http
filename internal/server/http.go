@@ -77,12 +77,12 @@ func (s *httpServer) handleConsume(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return 
 	}
-	off, err := s.Log.Append(req.Record)
+	record, err := s.Log.Read(req.Offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 
 	}
-	res := ProduceResponse{Offset: off}
+	res := ConsumeResponse{Record: record}
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
