@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	// "path/filepath"
 
 	"github.com/gorilla/mux"
 	"github.com/kei-gnu/golang_http/logger"
@@ -50,9 +52,32 @@ func newHTTPServer() *httpServer {
 	}
 }
 
+func WriteAccessLog(filename string, r *http.Request) error {
+	// f, err := os.Create(filename)
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err !=nil {
+		fmt.Println(err)
+		fmt.Println("fail to create file")
+		return nil 
+	}
+	defer f.Close()
+	
+	request_log := fmt.Sprintf("%s %s %s\n", r.Method, r.RequestURI, r.Proto)
+	count, err := f.Write([]byte(request_log))
+
+	if err !=nil {
+		fmt.Println(err)
+		fmt.Println("fail to write file")
+		return nil 
+	}
+
+	fmt.Printf("write %d bytes\n", count)
+	return nil
+}
+
 func (s *httpServer) handleProduce(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-
+	fmt.Printf("*http.request: %v\n", r)
 	var req ProduceRequest
 	err := json.NewDecoder(r.Body).Decode(&req)    // 意味わからんコードだ Decodeってなんだ？
 	if err != nil {
@@ -70,11 +95,12 @@ func (s *httpServer) handleProduce(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 
 	}
+	
 }
 
 func (s *httpServer) handleConsume(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-
+	fmt.Printf("handleConsume,http.Request: %v\n", r)
 	var req ConsumeRequest
 	err := json.NewDecoder(r.Body).Decode(&req)    // 意味わからんコードだ Decodeってなんだ？
 	if err != nil {
@@ -95,5 +121,11 @@ func (s *httpServer) handleConsume(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 
+	}
+	filename := "access_log"
+	fmt.Printf("filename: %v", filename)
+	err = WriteAccessLog(filename, r)
+	if err !=nil {
+		fmt.Printf(err.Error())
 	}
 }
