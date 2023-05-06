@@ -9,11 +9,12 @@ import (
 	"github.com/kei-gnu/golang_http/logger"
 )
 
-
+// HTTPサーバのインスタンス Logのインスタンス保持する
 type httpServer struct {
 	Log *logger.Log
 }
 
+// 
 type ProduceRequest struct {
 	Record logger.Record `json:"record"`
 }
